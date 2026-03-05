@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HDShips — Agent Onboarding Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0d1117;
+      --surface:  #141b26;
+      --border:   rgba(255,255,255,0.08);
+      --border-h: rgba(97,255,247,0.5);
+      --orange:   #070909;
+      --orange2:  #2a2a2a;
+      --cyan:     #61FFF7;
+      --white:    #f2f4f7;
+      --muted:    #8b96a8;
+      --error:    #f05c5c;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Montserrat', sans-serif;
+      background: var(--bg);
+      color: var(--white);
+      overflow: hidden;
+    }
+
+    /* subtle dot grid */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0;
+      background-image: radial-gradient(rgba(255,255,255,.04) 1px, transparent 1px);
+      background-size: 32px 32px;
+      pointer-events: none;
+    }
+
+    /* large ambient glow */
+    .glow {
+      position: fixed;
+      top: -200px; left: 50%;
+      transform: translateX(-50%);
+      width: 800px; height: 600px;
+      background: radial-gradient(ellipse at center, rgba(255,255,255,.03) 0%, transparent 65%);
+      pointer-events: none; z-index: 0;
+    }
+
+    /* layout */
+    .scene {
+      position: relative; z-index: 1;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    /* tagline strip above card */
+    .tagline-strip {
+      font-family: 'Montserrat', sans-serif;
+      font-size: .7rem;
+      font-weight: 600;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 1.5rem;
+      display: flex; align-items: center; gap: .6rem;
+      animation: fadeUp .5s ease both;
+    }
+    .tagline-strip::before,
+    .tagline-strip::after {
+      content: '';
+      width: 28px; height: 1px;
+      background: var(--cyan);
+      opacity: .5;
+    }
+
+    /* card */
+    .card {
+      width: 100%; max-width: 440px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 24px 64px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.03);
+      animation: fadeUp .6s .05s ease both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* orange top bar */
+    .card-bar {
+      height: 3px;
+      background: linear-gradient(90deg, var(--cyan), rgba(97,255,247,.3), transparent);
+    }
+
+    .card-body { padding: 2.5rem 2.5rem 2rem; }
+
+    /* brand */
+    .brand {
+      display: flex; align-items: center; gap: .9rem;
+      margin-bottom: 2rem;
+    }
+
+    .brand-wordmark {
+      display: flex; align-items: baseline; gap: 2px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 1.55rem;
+      letter-spacing: .01em;
+      line-height: 1;
+    }
+    .brand-hd { color: var(--white); }
+    .brand-ships { color: var(--cyan); }
+
+    .brand-divider {
+      width: 1px; height: 28px;
+      background: rgba(255,255,255,.12);
+    }
+
+    .brand-right { line-height: 1.25; }
+    .brand-right-top {
+      font-size: .65rem;
+      font-weight: 600;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .brand-right-btm {
+      font-size: .72rem;
+      font-weight: 500;
+      letter-spacing: .08em;
+      color: var(--cyan);
+      text-transform: uppercase;
+    }
+
+    /* heading block */
+    .heading-block { margin-bottom: 1.75rem; }
+    h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.45rem;
+      font-weight: 700;
+      letter-spacing: -.01em;
+      line-height: 1.2;
+      margin-bottom: .45rem;
+    }
+    .subhead {
+      font-size: .82rem;
+      font-weight: 400;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    /* form */
+    label {
+      display: block;
+      font-size: .7rem;
+      font-weight: 600;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: .45rem;
+    }
+
+    .field { margin-bottom: 1.1rem; }
+
+    .input-wrap { position: relative; display: flex; align-items: center; }
+
+    input[type="password"], input[type="text"] {
+      width: 100%;
+      padding: .8rem 2.8rem .8rem .9rem;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--white);
+      font-family: 'Montserrat', sans-serif;
+      font-size: .9rem;
+      letter-spacing: .05em;
+      outline: none;
+      transition: border-color .2s, background .2s;
+    }
+    input:focus {
+      border-color: var(--border-h);
+      background: rgba(97,255,247,.03);
+    }
+    input::placeholder { color: rgba(139,150,168,.35); }
+
+    .toggle-vis {
+      position: absolute; right: .8rem;
+      background: none; border: none; cursor: pointer;
+      color: var(--muted); padding: 0; line-height: 1;
+      transition: color .2s;
+    }
+    .toggle-vis:hover { color: var(--cyan); }
+    .toggle-vis svg { width: 16px; height: 16px; display: block; }
+
+    .error-msg {
+      display: none; align-items: center; gap: .4rem;
+      font-size: .76rem; color: var(--error);
+      margin-top: .45rem;
+    }
+    .error-msg.visible {
+      display: flex;
+      animation: shake .3s ease;
+    }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      25%      { transform: translateX(-5px); }
+      75%      { transform: translateX(5px); }
+    }
+
+    button[type="submit"] {
+      width: 100%; margin-top: .25rem;
+      padding: .85rem;
+      background: var(--orange);
+      border: none; border-radius: 4px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: #f2f4f7;
+      cursor: pointer;
+      transition: background .2s, transform .12s, box-shadow .2s;
+      box-shadow: 0 4px 20px rgba(7,9,9,.18);
+    }
+    button[type="submit"]:hover {
+      background: var(--orange2);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 28px rgba(7,9,9,.3);
+    }
+    button[type="submit"]:active { transform: translateY(0); }
+
+    .card-footer {
+      margin-top: 1.75rem; padding-top: 1.25rem;
+      border-top: 1px solid var(--border);
+      font-size: .73rem;
+      color: rgba(139,150,168,.5);
+      line-height: 1.6;
+      text-align: center;
+    }
+    .card-footer a { color: var(--cyan); text-decoration: none; }
+    .card-footer a:hover { text-decoration: underline; }
+
+    .bottom-tag {
+      margin-top: 1.5rem;
+      font-size: .68rem;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: rgba(139,150,168,.3);
+      animation: fadeUp .7s .15s ease both;
+    }
+
+    /* success overlay */
+    .success-overlay {
+      display: none;
+      position: fixed; inset: 0; z-index: 50;
+      background: var(--bg);
+      flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+    }
+    .success-overlay.show { display: flex; animation: fadeIn .4s ease; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .success-icon-wrap {
+      width: 60px; height: 60px; border-radius: 50%;
+      border: 2px solid var(--cyan);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 1.5rem;
+      animation: popIn .4s cubic-bezier(.22,1,.36,1) both;
+      box-shadow: 0 0 32px rgba(97,255,247,.2);
+    }
+    @keyframes popIn {
+      from { transform: scale(0.5); opacity: 0; }
+      to   { transform: scale(1);   opacity: 1; }
+    }
+    .success-icon-wrap svg { width: 26px; height: 26px; stroke: var(--cyan); stroke-width: 2.5; fill: none; }
+
+    .success-overlay h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.6rem; font-weight: 700;
+      margin-bottom: .4rem;
+    }
+    .success-overlay p { font-size: .85rem; color: var(--muted); }
+    .success-redirect {
+      margin-top: .75rem;
+      font-size: .72rem; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--cyan);
+    }
+
+    @media (max-width: 480px)
+      .card-body { padding: 2rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="glow"></div>
+
+<div class="scene">
+
+  <div class="tagline-strip">Our Journey, Your Destination</div>
+
+  <div class="card">
+    <div class="card-bar"></div>
+    <div class="card-body">
+
+      <div class="brand">
+        <div class="brand-wordmark">
+          <span class="brand-hd">HD</span><span class="brand-ships">Ships</span>
+        </div>
+        <div class="brand-divider"></div>
+        <div class="brand-right">
+          <div class="brand-right-top">Agent Portal</div>
+          <div class="brand-right-btm">Onboarding</div>
+        </div>
+      </div>
+
+      <div class="heading-block">
+        <h1>Welcome to the<br/>Agent Onboarding Portal</h1>
+        <p class="subhead">Enter the access code from your onboarding email to view your next steps.</p>
+      </div>
+
+      <form id="gate-form" onsubmit="checkPassword(event)">
+        <div class="field">
+          <label for="pwd">Access Code</label>
+          <div class="input-wrap">
+            <input type="password" id="pwd" placeholder="Enter your access code" autocomplete="off"/>
+            <button type="button" class="toggle-vis" onclick="toggleVis()" aria-label="Toggle visibility">
+              <svg id="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+          <div class="error-msg" id="error-msg">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Incorrect access code. Please check your email and try again.
+          </div>
+        </div>
+
+        <button type="submit">Access Portal</button>
+      </form>
+
+      <div class="card-footer">
+        Your access code was included in your onboarding email from HDShips.<br/>
+        Need help? <a href="mailto:onboarding@hdships.com">onboarding@hdships.com</a>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="bottom-tag">Powered by HDShips &amp; Tilt Technology</div>
+
+</div>
+
+<!-- Success -->
+<div class="success-overlay" id="success-overlay">
+  <div class="success-icon-wrap">
+    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+  </div>
+  <h2>Access Granted</h2>
+  <p>Redirecting you to your onboarding portal…</p>
+  <p class="success-redirect">&#9658; Loading HDShips Agent Onboarding</p>
+</div>
+
+<script>
+  // ── CONFIGURATION ──────────────────────────────────────────────
+  // 1. Set your shared access code here
+  const CORRECT_PASSWORD = "HDShips2025";
+
+  // 2. Replace with your actual Google Site URL
+  const REDIRECT_URL = "https://sites.google.com/your-site-url-here";
+  // ───────────────────────────────────────────────────────────────
+
+  function checkPassword(e) {
+    e.preventDefault();
+    const input = document.getElementById('pwd').value.trim();
+    const errorEl = document.getElementById('error-msg');
+
+    if (input === CORRECT_PASSWORD) {
+      errorEl.classList.remove('visible');
+      document.getElementById('success-overlay').classList.add('show');
+      setTimeout(() => { window.location.href = REDIRECT_URL; }, 2200);
+    } else {
+      errorEl.classList.remove('visible');
+      void errorEl.offsetWidth;
+      errorEl.classList.add('visible');
+      document.getElementById('pwd').value = '';
+      document.getElementById('pwd').focus();
+    }
+  }
+
+  function toggleVis() {
+    const field = document.getElementById('pwd');
+    const icon  = document.getElementById('eye-icon');
+    if (field.type === 'password') {
+      field.type = 'text';
+      icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+    } else {
+      field.type = 'password';
+      icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+    }
+  }
+</script>
+</body>
+</html>
